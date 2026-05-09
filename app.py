@@ -1,13 +1,15 @@
 # Program title: Storytelling App
-# Description: A storytelling app for kids aged 3-10.
+# This app is made for kids aged 3-10.
 
 # Import part
 import re
 import streamlit as st
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 
-# Safety: Prohibited words not suitable for kids aged 3-10
-PROHIBITED_WORDS = [
+# Safety part: words that kids should not see or hear
+
+# These are bad words we don't want in any story for little kids
+prohibited_words = [
     "kill", "killed", "murder", "blood", "death", "dead", "die", "died",
     "weapon", "gun", "knife", "sword", "fight", "attack", "war", "bomb",
     "shoot", "shot", "violent", "violence", "destroy", "evil",
@@ -21,7 +23,8 @@ PROHIBITED_WORDS = [
     "sexy", "naked", "gambling", "casino",
 ]
 
-SAFE_REPLACEMENTS = {
+# If a bad word shows up, we swap it with a nice word instead
+safe_replacements = {
     "kill": "stop", "killed": "stopped", "murder": "trouble",
     "death": "nap", "dead": "sleeping", "die": "rest", "died": "rested",
     "fight": "play", "attack": "surprise", "war": "game",
@@ -42,9 +45,10 @@ SAFE_REPLACEMENTS = {
 
 
 def check_and_clean(text):
-    """Check for prohibited words and replace them with safe alternatives."""
+    """Go through the text, find any bad words, and replace them with safe ones."""
     cleaned = text
-    for bad_word, good_word in SAFE_REPLACEMENTS.items():
+    for bad_word, good_word in safe_replacements.items():
+        # \b makes sure we match whole words only (e.g. "hit" won't match "white")
         pattern = re.compile(r'\b' + re.escape(bad_word) + r'\b', re.IGNORECASE)
         cleaned = pattern.sub(good_word, cleaned)
     return cleaned
@@ -52,23 +56,22 @@ def check_and_clean(text):
 
 # Function part
 
-# img2text
-# Model: https://huggingface.co/Salesforce/blip-image-captioning-base
+# img2text: look at the picture and describe what's in it
+# Model used: https://huggingface.co/Salesforce/blip-image-captioning-base
 def img2text(url):
-    """Generate a caption from the uploaded image."""
     image_to_text_model = pipeline("image-to-text", model="Salesforce/blip-image-captioning-base")
     text = image_to_text_model(url)[0]["generated_text"]
     return text
 
 
-# text2story
-# Model: https://huggingface.co/roneneldan/TinyStories-33M
+# text2story: take that description and write a fun story for kids
+# Model used: https://huggingface.co/roneneldan/TinyStories-33M
+# Tokenizer: https://huggingface.co/EleutherAI/gpt-neo-125M
 def text2story(text):
-    """Generate a kid-friendly short story based on the image caption."""
     model = AutoModelForCausalLM.from_pretrained("roneneldan/TinyStories-33M")
     tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-125M")
 
-    # Prompt designed for safe, fun, kid-friendly stories
+    # This prompt tells the model to start a happy, kid-friendly story
     prompt = (
         f"Once upon a time, there was {text}. "
         f"It was a bright sunny day and everyone was happy. "
@@ -85,71 +88,77 @@ def text2story(text):
     )
     story_text = tokenizer.decode(output[0], skip_special_tokens=True)
 
-    # Trim to 50-100 words
+    # Keep the story between 50-100 words so it's not too long for little kids
     words = story_text.split()
     if len(words) > 100:
         story_text = " ".join(words[:100])
+        # Try to end at the last full sentence
         if "." in story_text:
             story_text = story_text[:story_text.rfind(".") + 1]
         else:
             story_text += "."
 
-    # Safety filter: clean any prohibited words
+    # Run safety check to remove any bad words
     story_text = check_and_clean(story_text)
 
     return story_text
 
 
-# text2audio
-# Model: https://huggingface.co/Matthijs/mms-tts-eng
+# text2audio: read the story out loud
+# Model used: https://huggingface.co/Matthijs/mms-tts-eng
 def text2audio(story_text):
-    """Convert the story text into speech audio."""
     audio_pipe = pipeline("text-to-audio", model="Matthijs/mms-tts-eng")
     audio_data = audio_pipe(story_text)
     return audio_data
 
 
 # Main part
-st.set_page_config(page_title="Your Image to Audio Story", page_icon="https://img.icons8.com/?size=100&id=7xE1Vu0MCgzW&format=png&color=000000")
+
+# Set up the page
+st.set_page_config(page_title="Your Image to Audio Story", page_icon="https://icons8.com/icon/114461/story-book")
 st.header("🌈 Magic Story Time! 🧸")
 st.markdown("Hi there, little friend! 🎉 Pick a picture and I'll tell you a fun story!")
 
+# Let the kid upload a picture
 uploaded_file = st.file_uploader("🖼️ Choose your favorite picture!", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Save file locally
+    # Save the uploaded file so the model can read it
     bytes_data = uploaded_file.getvalue()
     with open(uploaded_file.name, "wb") as file:
         file.write(bytes_data)
 
+    # Show the picture on screen
     st.image(uploaded_file, caption="Your Picture", use_column_width=True)
 
-    # Stage 1: Image to Text (hidden from user with spinner)
+    # Step 1: Look at the picture and describe it
     with st.spinner("🔍 Let me look at your picture..."):
         scenario = img2text(uploaded_file.name)
+        # Clean the description too, in case the model sees something inappropriate
         scenario = check_and_clean(scenario)
 
-    # Stage 2: Text to Story (hidden from user with spinner)
+    # Step 2: Write a story based on what's in the picture
     with st.spinner("✨ Writing a magical story for you..."):
         story = text2story(scenario)
 
-    # Show the story
+    # Show the story to the kid
     st.write(f"**📖 Your Story:** {story}")
 
-    # Stage 3: Story to Audio (hidden from user with spinner)
-    with st.spinner("https://icons8.com/icon/05C4OErNcOAA/listening Getting the storyteller ready..."):
+    # Step 3: Turn the story into audio so kids can listen
+    with st.spinner("Getting the storyteller ready..."):
         audio_data = text2audio(story)
 
-    # Play button
+    # Button to play the audio
     if st.button("🔊 Read the Story to Me!"):
         audio_array = audio_data["audio"]
         sample_rate = audio_data["sampling_rate"]
         st.audio(audio_array, sample_rate=sample_rate)
 
-    # Encourage trying another image
+    # Tell the kid they can try again
     st.markdown("---")
     st.markdown("🌟 **Wow, that was fun! Want to hear another story? Pick a new picture above!** 🎈")
 
 else:
+    # When no picture is uploaded yet, show a friendly hint
     st.markdown("---")
     st.markdown("👆 **Pick a picture to start the magic!** Try a photo of your pet 🐱, a flower 🌻, or your toy 🧸!")
