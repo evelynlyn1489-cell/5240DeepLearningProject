@@ -1,15 +1,12 @@
 # Program title: Storytelling App
 # Description: A storytelling app for kids aged 3-10.
-#              Upload an image -> generate a story -> listen to it!
 
 # Import part
 import re
 import streamlit as st
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 
-# ============================================================
 # Safety: Prohibited words not suitable for kids aged 3-10
-# ============================================================
 PROHIBITED_WORDS = [
     "kill", "killed", "murder", "blood", "death", "dead", "die", "died",
     "weapon", "gun", "knife", "sword", "fight", "attack", "war", "bomb",
@@ -53,9 +50,7 @@ def check_and_clean(text):
     return cleaned
 
 
-# ============================================================
 # Function part
-# ============================================================
 
 # img2text
 # Model: https://huggingface.co/Salesforce/blip-image-captioning-base
@@ -114,9 +109,7 @@ def text2audio(story_text):
     return audio_data
 
 
-# ============================================================
 # Main part
-# ============================================================
 st.set_page_config(page_title="Your Image to Audio Story", page_icon="https://img.icons8.com/?size=100&id=7xE1Vu0MCgzW&format=png&color=000000")
 st.header("🌈 Magic Story Time! 🧸")
 st.markdown("Hi there, little friend! 🎉 Pick a picture and I'll tell you a fun story!")
@@ -144,7 +137,7 @@ if uploaded_file is not None:
     st.write(f"**📖 Your Story:** {story}")
 
     # Stage 3: Story to Audio (hidden from user with spinner)
-    with st.spinner("🎤 Getting the storyteller ready..."):
+    with st.spinner("https://img.icons8.com/?size=100&id=05C4OErNcOAA&format=png&color=000000 Getting the storyteller ready..."):
         audio_data = text2audio(story)
 
     # Play button
