@@ -117,7 +117,7 @@ def text2audio(story_text):
 # ============================================================
 # Main part
 # ============================================================
-st.set_page_config(page_title="Your Image to Audio Story", page_icon="https://icons8.com/icon/7xE1Vu0MCgzW/story-book")
+st.set_page_config(page_title="Your Image to Audio Story", page_icon="https://img.icons8.com/?size=100&id=7xE1Vu0MCgzW&format=png&color=000000")
 st.header("🌈 Magic Story Time! 🧸")
 st.markdown("Hi there, little friend! 🎉 Pick a picture and I'll tell you a fun story!")
 
