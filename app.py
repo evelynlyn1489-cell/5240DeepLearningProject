@@ -1,13 +1,11 @@
 # Program title: Storytelling App
 # This app is made for kids aged 3-10.
-
 # Import part
 import re
 import streamlit as st
 from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 
 # Safety part: words that kids should not see or hear
-
 # These are bad words we don't want in any story for little kids
 prohibited_words = [
     "kill", "killed", "murder", "blood", "death", "dead", "die", "died",
@@ -136,6 +134,9 @@ if uploaded_file is not None:
         scenario = img2text(uploaded_file.name)
         # Clean the description too, in case the model sees something inappropriate
         scenario = check_and_clean(scenario)
+
+    # Show what the AI saw in the picture
+    st.write(f"**Scenario:** {scenario}")
 
     # Step 2: Write a story based on what's in the picture
     with st.spinner("✨ Writing a magical story for you..."):
