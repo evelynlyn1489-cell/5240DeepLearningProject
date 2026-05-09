@@ -40,7 +40,7 @@ SAFE_REPLACEMENTS = {
     "prison": "time-out room", "jail": "time-out room",
     "hate": "dislike", "stupid": "silly", "ugly": "different",
     "bully": "grumpy friend", "cruel": "unkind",
-    "scary": "surprising", "scream": "shout",
+    "scream": "shout",
 }
 
 
@@ -117,11 +117,11 @@ def text2audio(story_text):
 # ============================================================
 # Main part
 # ============================================================
-st.set_page_config(page_title="Your Image to Audio Story", page_icon="🦜")
-st.header("🦜 Turn Your Image to Audio Story")
-st.markdown("A fun storytelling app for kids! Upload a picture and hear a story!")
+st.set_page_config(page_title="Your Image to Audio Story", page_icon="🧸")
+st.header("🌈 Magic Story Time! 🧸")
+st.markdown("Hi there, little friend! 🎉 Pick a picture and I'll tell you a fun story!")
 
-uploaded_file = st.file_uploader("Select an Image...", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("🖼️ Choose your favorite picture!", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     # Save file locally
@@ -129,30 +129,34 @@ if uploaded_file is not None:
     with open(uploaded_file.name, "wb") as file:
         file.write(bytes_data)
 
-    st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+    st.image(uploaded_file, caption="Your Picture", use_column_width=True)
 
-    # Stage 1: Image to Text
-    st.text('Processing img2text...')
-    scenario = img2text(uploaded_file.name)
-    # Clean the caption before showing it (e.g. "smoking" -> "making clouds")
-    scenario = check_and_clean(scenario)
-    st.write(f"**Scenario:** {scenario}")
+    # Stage 1: Image to Text (hidden from user with spinner)
+    with st.spinner("🔍 Let me look at your picture..."):
+        scenario = img2text(uploaded_file.name)
+        scenario = check_and_clean(scenario)
 
-    # Stage 2: Text to Story
-    st.text('Generating a story...')
-    story = text2story(scenario)
-    st.write(f"**Story:** {story}")
+    # Stage 2: Text to Story (hidden from user with spinner)
+    with st.spinner("✨ Writing a magical story for you..."):
+        story = text2story(scenario)
 
-    # Stage 3: Story to Audio
-    st.text('Generating audio data...')
-    audio_data = text2audio(story)
+    # Show the story
+    st.write(f"**📖 Your Story:** {story}")
+
+    # Stage 3: Story to Audio (hidden from user with spinner)
+    with st.spinner("🎤 Getting the storyteller ready..."):
+        audio_data = text2audio(story)
 
     # Play button
-    if st.button("Play Audio"):
+    if st.button("🔊 Read the Story to Me!"):
         audio_array = audio_data["audio"]
         sample_rate = audio_data["sampling_rate"]
         st.audio(audio_array, sample_rate=sample_rate)
 
     # Encourage trying another image
     st.markdown("---")
-    st.markdown("🔄 **Want another story? Upload a new image above!**")
+    st.markdown("🌟 **Wow, that was fun! Want to hear another story? Pick a new picture above!** 🎈")
+
+else:
+    st.markdown("---")
+    st.markdown("👆 **Pick a picture to start the magic!** Try a photo of your pet 🐱, a flower 🌻, or your toy 🧸!")
