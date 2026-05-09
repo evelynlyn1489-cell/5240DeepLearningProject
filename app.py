@@ -116,7 +116,7 @@ def text2audio(story_text):
 
 # Set up the page
 st.set_page_config(page_title="Your Image to Audio Story", page_icon="https://img.icons8.com/?size=100&id=114461&format=png&color=000000")
-st.header("https://icons8.comundefined Turn Your Image to Audio Story")
+st.header("https://icons8.comundefined" "Turn Your Image to Audio Story")
 st.markdown("Hi there, little friend! Pick a picture and I'll tell you a fun story!")
 
 # Let the kid upload a picture
