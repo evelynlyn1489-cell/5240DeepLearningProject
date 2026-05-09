@@ -137,7 +137,7 @@ if uploaded_file is not None:
     st.write(f"**📖 Your Story:** {story}")
 
     # Stage 3: Story to Audio (hidden from user with spinner)
-    with st.spinner("https://img.icons8.com/?size=100&id=05C4OErNcOAA&format=png&color=000000 Getting the storyteller ready..."):
+    with st.spinner("https://icons8.com/icon/05C4OErNcOAA/listening Getting the storyteller ready..."):
         audio_data = text2audio(story)
 
     # Play button
